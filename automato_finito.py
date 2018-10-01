@@ -10,10 +10,14 @@ class AutomatoFinito:
 	def set_estado_inicial(self, estado):
 		if (estado in self.estados):
 			self.inicial = estado
+		else:
+			print('estado ', estado , ' nao existe')
 
 	def add_estados_finais(self, estado):
 		if (estado in self.estados):
 			self.finais = self.finais.union((estado,))
+		else:
+			print('estado ', estado , ' nao existe'))
 
 	def add_transicao(self, ei, ch, ef):
 		if (ei in self.estados and ef in self.estados):
@@ -21,6 +25,8 @@ class AutomatoFinito:
 				self.transicoes[(ei, ch)].append(ef)
 			else:
 				self.transicoes[(ei, ch)] = [ef]
+		else:
+			print('estado nao existe')
 
 	def check(self, palavra) -> bool:
 		atual = self.inicial

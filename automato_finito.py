@@ -46,6 +46,7 @@ class AutomatoFinito:
 		for x in self.transicoes.keys():
 			lista = lista.union(set(x[1]))
 			count = count + 1
+		lista = lista - set('&')
 		return lista
 
 	def print(self):
@@ -71,3 +72,32 @@ class AutomatoFinito:
 				saida = saida + f'{est:15}|'
 			saida = saida + '\n'
 		return saida
+
+	def to_afd(self):
+		afd = AutomatoFinito()
+		for e in self.estados:
+			estados_extras = set()
+			if (e, '&') in self.transacoes.keys():
+				for t in self.transicoes[(e, a)]
+					estados_extras = estados_extras.union((t,))
+			for a in self.alfabeto():
+				if ((e, a) in self.transicoes.keys()):
+					afd.add_estado(e)
+					if e == inicial:
+						afd.set_estado_inicial(e)
+					if (self.transicoes[(e, a)] > 1):
+						novo_estado = estados_extras
+						final = False
+						for t in self.transicoes[(e, a)]
+							novo_estado = novo_estado.union((t,))
+							if t in finais:
+								final = True
+						afd.add_estado(novo_estado)
+						afd.add_transicao(e, a, novo_estado)
+						if final:
+							afd.add_estados_finais(novo_estado)
+					else:
+						afd.add_transicao(e, a, self.transicoes[(e, a)][0])
+						if self.transicoes[(e, a)][0] in finais:
+							afd.add_estados_finais(self.transicoes[(e, a)][0])
+		return afd

@@ -5,10 +5,10 @@ class AutomatoFinito:
 	finais = set()
 
 	def __init__(self):
-		estados = set()
-		transicoes = {}
-		inicial = ''
-		finais = set()
+		self.estados = set()
+		self.transicoes = {}
+		self.inicial = ''
+		self.finais = set()
 
 	def add_estado(self, estado):
 		self.estados = self.estados.union((estado,))
@@ -87,10 +87,6 @@ class AutomatoFinito:
 	def to_afd(self, count, novos):
 		repetir = False
 		afd = AutomatoFinito()
-		afd.estados = set()
-		afd.transicoes = {}
-		afd.inicio = ''
-		afd.finais = set()
 		for e in self.estados:
 			estados_extras = []
 			if (e, '&') in self.transicoes.keys():
@@ -128,16 +124,13 @@ class AutomatoFinito:
 							count = count + 1
 							refaz = True
 						afd.add_estado(x)
-						print(e, a, x)
 						afd.add_transicao(e, a, x)
 						if refaz:
 							for b in self.alfabeto():
 								for nova in novo_estado:								
 									if (nova, b) in self.transicoes.keys():
 										afd.add_transicao(x, b, self.transicoes[(nova, b)][0])
-								print(afd.transicoes[(x, b)])
 								if len(afd.transicoes[(x, b)]) > 1:
-									print('baaatatat')
 									repetir = True
 						if final:
 							afd.add_estados_finais(x)
@@ -146,7 +139,6 @@ class AutomatoFinito:
 						afd.add_transicao(e, a, self.transicoes[(e, a)][0])
 						if self.transicoes[(e, a)][0] in self.finais:
 							afd.add_estados_finais(self.transicoes[(e, a)][0])
-		print(novos)
 		if repetir:
 			print('repetiu')
 			return afd.to_afd(count, novos)

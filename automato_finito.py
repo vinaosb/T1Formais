@@ -29,7 +29,8 @@ class AutomatoFinito:
 		self.add_estado(ei)
 		self.add_estado(ef)
 		if ((ei, ch) in self.transicoes.keys()):
-			self.transicoes[(ei, ch)].append(ef)
+			if not ef in self.transicoes[(ei, ch)]:
+				self.transicoes[(ei, ch)].append(ef)
 		else:
 			self.transicoes[(ei, ch)] = [ef]
 
@@ -107,44 +108,47 @@ class AutomatoFinito:
 						for t in novo_estado:
 							if t in self.finais:
 								final = True
-						if not (novo_estado in frozenset(novos.keys())):
-							re_novo = set()
-							for n in novo_estado:
-								if n[0] == '_':
-									ctx = int(n[1:-1])
-									for est, ct in novos.items():
-										if ct == ctx:
-											re_novo = re_novo.union(est)
-								else:
-									re_novo = re_novo.union((n,))
-							novo_estado = re_novo
-							refaz = False
-							if novo_estado in frozenset(novos):
-								count = novos[frozenset(novo_estado)]
+						re_novo = set()
+						for n in novo_estado:
+							if n[0] == '_':
+								ctx = int(n[1:-1])
+								for est, ct in novos.items():
+									if ct == ctx:
+										re_novo = re_novo.union(est)
 							else:
-								novos[frozenset(novo_estado)] = count
-								count = count + 1
-								refaz = True
+								re_novo = re_novo.union((n,))
+						novo_estado = re_novo
+						refaz = False
+						if novo_estado in frozenset(novos):
+							count = novos[frozenset(novo_estado)]
 							x = '_' + str(count) + '_'
-							afd.add_estado(x)
-							afd.add_transicao(e, a, x)
-							z = 0
-							if refaz:
-								for nova in novo_estado:
-									for b in self.alfabeto():
-										
+						else:
+							novos[frozenset(novo_estado)] = count
+							x = '_' + str(count) + '_'
+							count = count + 1
+							refaz = True
+						afd.add_estado(x)
+						print(e, a, x)
+						afd.add_transicao(e, a, x)
+						if refaz:
+							for b in self.alfabeto():
+								for nova in novo_estado:								
+									if (nova, b) in self.transicoes.keys():
 										afd.add_transicao(x, b, self.transicoes[(nova, b)][0])
-										z = z + 1
-							if z > 1:
-								repetir = True
-							if final:
-								afd.add_estados_finais(x)
+								print(afd.transicoes[(x, b)])
+								if len(afd.transicoes[(x, b)]) > 1:
+									print('baaatatat')
+									repetir = True
+						if final:
+							afd.add_estados_finais(x)
 					else:
 						afd.add_estado(self.transicoes[(e, a)][0])
 						afd.add_transicao(e, a, self.transicoes[(e, a)][0])
 						if self.transicoes[(e, a)][0] in self.finais:
 							afd.add_estados_finais(self.transicoes[(e, a)][0])
+		print(novos)
 		if repetir:
+			print('repetiu')
 			return afd.to_afd(count, novos)
 		else:
 			return afd

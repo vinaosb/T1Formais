@@ -1,8 +1,14 @@
 class AutomatoFinito:
 	estados = set()
 	transicoes = {}
-	inicial: ''
+	inicial =  ''
 	finais = set()
+
+	def __init__(self):
+		estados = set()
+		transicoes = {}
+		inicial = ''
+		finais = set()
 
 	def add_estado(self, estado):
 		self.estados = self.estados.union((estado,))
@@ -17,16 +23,15 @@ class AutomatoFinito:
 		if (estado in self.estados):
 			self.finais = self.finais.union((estado,))
 		else:
-			print('estado ', estado , ' nao existe'))
+			print('estado ', estado , ' nao existe')
 
 	def add_transicao(self, ei, ch, ef):
-		if (ei in self.estados and ef in self.estados):
-			if ((ei, ch) in self.transicoes.keys()):
-				self.transicoes[(ei, ch)].append(ef)
-			else:
-				self.transicoes[(ei, ch)] = [ef]
+		self.add_estado(ei)
+		self.add_estado(ef)
+		if ((ei, ch) in self.transicoes.keys()):
+			self.transicoes[(ei, ch)].append(ef)
 		else:
-			print('estado nao existe')
+			self.transicoes[(ei, ch)] = [ef]
 
 	def check(self, palavra) -> bool:
 		atual = self.inicial
@@ -61,7 +66,12 @@ class AutomatoFinito:
 		saida = saida + '\n'
 		saida = temp + "\n" + saida + temp + "\n"
 		for e in self.estados:
-			saida = saida + f'|{e:15}|'
+			es = e
+			if e == self.inicial:
+				es = '->' + e
+			if e in self.finais:
+				es = es + '*'
+			saida = saida + f'|{es:15}|'
 			for a in alfabeto:
 				est = ''
 				if (e,a) in self.transicoes.keys():
@@ -73,31 +83,70 @@ class AutomatoFinito:
 			saida = saida + '\n'
 		return saida
 
-	def to_afd(self):
+	def to_afd(self, count, novos):
+		repetir = False
 		afd = AutomatoFinito()
+		afd.estados = set()
+		afd.transicoes = {}
+		afd.inicio = ''
+		afd.finais = set()
 		for e in self.estados:
-			estados_extras = set()
-			if (e, '&') in self.transacoes.keys():
-				for t in self.transicoes[(e, a)]
+			estados_extras = []
+			if (e, '&') in self.transicoes.keys():
+				for t in self.transicoes[(e, '&')]:
 					estados_extras = estados_extras.union((t,))
 			for a in self.alfabeto():
 				if ((e, a) in self.transicoes.keys()):
 					afd.add_estado(e)
-					if e == inicial:
+					if e == self.inicial:
 						afd.set_estado_inicial(e)
-					if (self.transicoes[(e, a)] > 1):
-						novo_estado = estados_extras
+					if (len(self.transicoes[(e, a)]) > 1):
+						novo_estado = set()
+						novo_estado = novo_estado.union(estados_extras).union(self.transicoes[(e, a)])
 						final = False
-						for t in self.transicoes[(e, a)]
-							novo_estado = novo_estado.union((t,))
-							if t in finais:
+						for t in novo_estado:
+							if t in self.finais:
 								final = True
-						afd.add_estado(novo_estado)
-						afd.add_transicao(e, a, novo_estado)
-						if final:
-							afd.add_estados_finais(novo_estado)
+						if not (novo_estado in frozenset(novos.keys())):
+							re_novo = set()
+							for n in novo_estado:
+								if n[0] == '_':
+									ctx = int(n[1:-1])
+									for est, ct in novos.items():
+										if ct == ctx:
+											re_novo = re_novo.union(est)
+								else:
+									re_novo = re_novo.union((n,))
+							novo_estado = re_novo
+							refaz = False
+							if novo_estado in frozenset(novos):
+								count = novos[frozenset(novo_estado)]
+							else:
+								novos[frozenset(novo_estado)] = count
+								count = count + 1
+								refaz = True
+							x = '_' + str(count) + '_'
+							afd.add_estado(x)
+							afd.add_transicao(e, a, x)
+							z = 0
+							if refaz:
+								for nova in novo_estado:
+									for b in self.alfabeto():
+										
+										afd.add_transicao(x, b, self.transicoes[(nova, b)][0])
+										z = z + 1
+							if z > 1:
+								repetir = True
+							if final:
+								afd.add_estados_finais(x)
 					else:
+						afd.add_estado(self.transicoes[(e, a)][0])
 						afd.add_transicao(e, a, self.transicoes[(e, a)][0])
-						if self.transicoes[(e, a)][0] in finais:
+						if self.transicoes[(e, a)][0] in self.finais:
 							afd.add_estados_finais(self.transicoes[(e, a)][0])
-		return afd
+		if repetir:
+			return afd.to_afd(count, novos)
+		else:
+			return afd
+#if !(t in estados_extras):
+#	estados_extras.append(t)

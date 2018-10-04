@@ -11,6 +11,7 @@ at.add_transicao('q0', 'a', 'qf')
 at.add_transicao('qf', 'a', 'q0')
 at.add_transicao('q0', 'b', 'q1')
 at.add_transicao('q1', 'a', 'qf')
+at = at.to_afd(0, {})
 print(at.print())
 print(at.alfabeto())
 

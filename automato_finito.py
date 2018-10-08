@@ -1,3 +1,5 @@
+from gramatica_regular import *
+
 class AutomatoFinito:
 	estados = set()
 	transicoes = {}
@@ -140,9 +142,106 @@ class AutomatoFinito:
 						if self.transicoes[(e, a)][0] in self.finais:
 							afd.add_estados_finais(self.transicoes[(e, a)][0])
 		if repetir:
-			print('repetiu')
 			return afd.to_afd(count, novos)
 		else:
 			return afd
+
+	def to_gr(self):
+		gr = GramaticaRegular()
+		gr.variaveis = self.estados
+		gr.inicial = self.inicial
+		for t in self.transicoes.keys():
+			if self.transicoes[t][0] in self.finais:
+				gr.add_regras(t[0], t[1], '&')
+			else:
+				gr.add_regras(t[0], t[1], self.transicoes[t][0])
+		if self.inicial in self.finais:
+			gr.add_regras(self.inicial, '&')
+		return gr
+
+	def uniao(self, at):
+		novo = AutomatoFinito()
+		a_1 = self.alfabeto()
+		a_2 = at.alfabeto()
+		k_1 = self.transicoes.keys()
+		k_2 = at.transicoes.keys()
+		alfabeto = a_1.union(a_2)
+		novos_estados = set()
+		novos_estados = novos_estados.union(((self.inicial, at.inicial),))
+		novo.add_estado(self.inicial + '_' + at.inicial)
+		novo.set_estado_inicial(self.inicial + '_' + at.inicial)
+		while len(novos_estados) > 0:
+			proximos = set()
+			for e in novos_estados:
+				for a in alfabeto:
+					if (e[0], a) in k_1:
+						ef_1 = self.transicoes[(e[0], a)][0]
+					else:
+						ef_1 = '&'
+					if (e[1], a) in k_2:
+						ef_2 = at.transicoes[(e[1], a)][0]
+					else:
+						ef_2 = '&'
+
+					
+					i = e[0] + '_' + e[1]
+					if ef_1 == '&' and ef_2 == '&':
+						f = '&'
+					else:
+						f = ef_1 + '_' + ef_2
+					if not f in novo.estados:
+						proximos.add((ef_1, ef_2),)
+					novo.add_transicao(i, a, f)
+					if (ef_1 in self.finais) or (ef_2 in at.finais):
+						novo.add_estados_finais(f)
+					if (e[0] in self.finais) or (e[1] in at.finais):
+						novo.add_estados_finais(i)
+			novos_estados = proximos
+		novo.estados.remove('&_&')
+		novo.estados.remove('&')
+		return novo
+
+	def intersecao(self, at):
+		novo = AutomatoFinito()
+		a_1 = self.alfabeto()
+		a_2 = at.alfabeto()
+		k_1 = self.transicoes.keys()
+		k_2 = at.transicoes.keys()
+		alfabeto = a_1.union(a_2)
+		novos_estados = set()
+		novos_estados = novos_estados.union(((self.inicial, at.inicial),))
+		novo.add_estado(self.inicial + '_' + at.inicial)
+		novo.set_estado_inicial(self.inicial + '_' + at.inicial)
+		while len(novos_estados) > 0:
+			proximos = set()
+			for e in novos_estados:
+				for a in alfabeto:
+					if (e[0], a) in k_1:
+						ef_1 = self.transicoes[(e[0], a)][0]
+					else:
+						ef_1 = '&'
+					if (e[1], a) in k_2:
+						ef_2 = at.transicoes[(e[1], a)][0]
+					else:
+						ef_2 = '&'
+
+					
+					i = e[0] + '_' + e[1]
+					if ef_1 == '&' and ef_2 == '&':
+						f = '&'
+					else:
+						f = ef_1 + '_' + ef_2
+					if not f in novo.estados:
+						proximos.add((ef_1, ef_2),)
+					novo.add_transicao(i, a, f)
+					if (ef_1 in self.finais) and (ef_2 in at.finais):
+						novo.add_estados_finais(f)
+					if (e[0] in self.finais) and (e[1] in at.finais):
+						novo.add_estados_finais(i)
+			novos_estados = proximos
+		novo.estados.remove('&_&')
+		novo.estados.remove('&')
+		return novo
+
 #if !(t in estados_extras):
 #	estados_extras.append(t)

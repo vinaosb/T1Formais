@@ -2,7 +2,11 @@ class GramaticaRegular:
 	variaveis = set()
 	transicoes = {}
 	inicial: ''
-	finais = set()
+
+	def __init__(self):
+		self.variaveis = set()
+		self.transicoes = {}
+		self.inicial = ''
 
 	def add_variavel(self, variavel):
 		self.variaveis = self.variaveis.union((variavel,))
@@ -10,9 +14,6 @@ class GramaticaRegular:
 	def set_variavel_inicial(self, variavel):
 		if variavel in self.variaveis:
 			self.inicial = variavel
-
-	def add_regras(self, v, t):
-		self.add_regras(v, t, '&')
 
 	def add_regras(self, v1, t, v2):
 		if (v1 in self.variaveis):
@@ -25,11 +26,15 @@ class GramaticaRegular:
 	def print(self):
 		saida = ''
 		for v in self.variaveis:
+			if v == self.inicial:
+				saida = saida + '->'
+			saida = saida + '(' + v + ') -> '
 			for prod in self.transicoes[v]:
 				if prod[1] != '&':
-					saida = saida + v + ' -> ' + prod[0] + prod[1] + '\n'
+					saida = saida + prod[0] + '(' +prod[1] + ') | '
 				else:
-					saida = saida + v + ' -> ' + prod[0] + '\n'
+					saida = saida + prod[0] + ' | '
+			saida = saida[:-2] + '\n'
 		return saida
 
 	def alfabeto(self):

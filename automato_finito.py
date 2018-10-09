@@ -243,5 +243,48 @@ class AutomatoFinito:
 		novo.estados.remove('&')
 		return novo
 
+	def remover_estados_inalcancaveis(self):
+		estados_alcancaveis = set()
+		transicoes_alcancaveis = {}
+		novos_estados = set()
+		novos_estados.add(self.inicial)
+		alfabeto = self.alfabeto()
+		while len(novos_estados) > 0:
+			proximos = set()
+			for e in novos_estados:
+				estados_alcancaveis.add(e)
+				for a in alfabeto:
+					if (e,a) in self.transicoes.keys():
+						transicoes_alcancaveis[(e,a)] = [self.transicoes[(e, a)][0]]
+						n = self.transicoes[(e, a)][0]
+						if n != '&' and not n in estados_alcancaveis:
+							proximos.add(n)
+			novos_estados = proximos
+		self.estados = estados_alcancaveis
+		self.transicoes = transicoes_alcancaveis
+
+	def remover_estados_mortos(self):
+		estados_nao_mortos = set()
+		transicoes_nao_mortas = {}
+		novos_estados = set()
+		novos_estados = self.finais
+		alfabeto = self.alfabeto()
+		while len(novos_estados) > 0:
+			proximos = set()
+			for e in novos_estados:
+				estados_nao_mortos.add(e)
+				for key , value in self.transicoes.items():
+					if e == value[0]:
+						transicoes_nao_mortas[key] = [self.transicoes[key][0]]
+						if not key[0] in estados_nao_mortos:
+							proximos.add(key[0])
+			novos_estados = proximos
+		self.estados = estados_nao_mortos
+		self.transicoes = transicoes_nao_mortas
+
+
+	def remover_estados_equivalentes(self):
+		return 0
+
 #if !(t in estados_extras):
 #	estados_extras.append(t)

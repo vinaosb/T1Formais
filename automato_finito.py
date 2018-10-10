@@ -1,3 +1,7 @@
+#   Trabalho 1   Formais
+# Alunos: Bruno George de Moraes
+#         Wagner Santos
+#
 from gramatica_regular import *
 
 class AutomatoFinito:

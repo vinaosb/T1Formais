@@ -1,5 +1,11 @@
+import automato_finito
 class ExpressaoRegular:
 	expr = ''
 
-	def set_expressao(self, expressao):
-		self.expr = expressao
+	def __init__(self, expr):
+		self.expr = expr
+
+	def to_afd():
+		af = automato_finito.AutomatoFinito()
+		#TODO
+		return af

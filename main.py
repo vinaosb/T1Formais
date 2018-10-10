@@ -12,7 +12,7 @@ at.add_transicao('qf', 'b', 'q0')
 at.add_transicao('q1', 'b', 'q1')
 at.add_transicao('q1', 'a', 'q1')
 print(at.print())
-at.remover_estados_mortos()
+at.remover_estados_equivalentes()
 print(at.print())
 
 gr = GramaticaRegular()
@@ -25,3 +25,4 @@ gr.add_regras('A', 'c', '&')
 
 print(gr.print())
 print(gr.alfabeto())
+print(gr.to_afnd().print())

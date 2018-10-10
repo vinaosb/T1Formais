@@ -1,3 +1,5 @@
+import automato_finito
+
 class GramaticaRegular:
 	variaveis = set()
 	transicoes = {}
@@ -43,3 +45,19 @@ class GramaticaRegular:
 			for prod in self.transicoes[v]:
 				lista = lista.union(prod[0])
 		return lista
+
+	def to_afnd(self):
+		af = automato_finito.AutomatoFinito()
+		final = '_F_'
+		af.estados = self.variaveis.union((final,))
+		af.inicial = self.inicial
+		af.finais.add(final)
+		for v in self.variaveis:
+			for e in self.transicoes[v]:
+				if e[0] == '&' and e[1] == '&':
+					af.finais.add(v)
+				elif e[0] != '&' and e[1] == '&':
+					af.transicoes[v, e[0]] = [final]
+				else:
+					af.transicoes[v, e[0]] = e[1]
+		return af

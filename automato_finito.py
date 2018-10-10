@@ -284,7 +284,27 @@ class AutomatoFinito:
 
 
 	def remover_estados_equivalentes(self):
-		return 0
+		#TODO
+		estados = []
+		estados.append(frozenset(self.finais))
+		estados.append(frozenset(self.estados - self.finais))
+		#estados = self.separar_estados(frozenset(estados))
+		self.estados = set()
+		for e in estados:
+			for x in e:
+				self.estados.add(x)
+				break
+		return 
+
+	def separar_estados(self, estados):
+		#TODO
+		transicoes = {}
+		#for e in estados:
+		#	for x in e:
+		#		for a in self.alfabeto()
+		##			for i in len(estados):
+		#				if 
+#
 
 #if !(t in estados_extras):
 #	estados_extras.append(t)

@@ -19,9 +19,37 @@ class ExpressaoRegular:
 		saida = '' + self.expr
 		saida += '\n'
 		return saida
-	# AHO 3.9.3
-	#def nullable
+	
+        def gen_tree(self):
+	 ot = self.expr
+                print(ot.translate(bytes.maketrans(b"()", b"[]")) )
+                
+                print( "\n")
+                st = deque(ot)
+                s = deque('')
+                for c in st:
+                        s.appendleft('[')
+                        s.append(c)
+                        s.append(']')
+                        
+                 #TODO nao tah gerando corretamenta a notacao.
+                #labelled bracket notation [X value]
+                # [S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics
+                
+                        
+                print("------------------\n")
+                print(s)      
+                                               
+                return s
 
+        # AHO 3.9.3
+        # '&' null element
+        def nullable(st):
+                nullable = false 
+                if st.find('&'):
+                        nullable = true
+                return nullable
+        
 	#def rst_opN
 
 	#def lastpos(N) 

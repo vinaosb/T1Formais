@@ -4,21 +4,20 @@
 #
 import automato_finito
 class ExpressaoRegular:
-        syntaxTree = {}
-	expr = ''
 
-	def __init__(self, expr):
-		self.expr = expr
+        syntaxTree = {}
+        expr = ''
+
+        def __init__(self, expr):
+                self.expr = expr
 		
         def add_expressao(self, expressao):                
                 self.expr.append(expressao)
         
-        def print(self)
+        def print(self):
                 saida = '' + self.expr
-
                 saida += '\n'
                 return saida
-
         # AHO 3.9.3
         #def nullable
 
@@ -28,8 +27,8 @@ class ExpressaoRegular:
         #def followpos(P)
 
         # AHO 3.9.5
-	def to_afd():
-		af = automato_finito.AutomatoFinito()
+        def to_afd(self):
+                af = automato_finito.AutomatoFinito()
 		#TODO
-		return af
+                return af
         

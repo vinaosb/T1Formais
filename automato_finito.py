@@ -2,7 +2,7 @@
 # Alunos: Bruno George de Moraes
 #         Wagner Santos
 #
-from gramatica_regular import *
+import gramatica_regular
 
 class AutomatoFinito:
 	estados = set()
@@ -97,7 +97,7 @@ class AutomatoFinito:
 			estados_extras = []
 			if (e, '&') in self.transicoes.keys():
 				for t in self.transicoes[(e, '&')]:
-					estados_extras = estados_extras.union((t,))
+					estados_extras = estados_extras.append((t,))
 			for a in self.alfabeto():
 				if ((e, a) in self.transicoes.keys()):
 					afd.add_estado(e)
@@ -151,7 +151,7 @@ class AutomatoFinito:
 			return afd
 
 	def to_gr(self):
-		gr = GramaticaRegular()
+		gr = gramatica_regular.GramaticaRegular()
 		gr.variaveis = self.estados
 		gr.inicial = self.inicial
 		for t in self.transicoes.keys():
@@ -160,7 +160,7 @@ class AutomatoFinito:
 			else:
 				gr.add_regras(t[0], t[1], self.transicoes[t][0])
 		if self.inicial in self.finais:
-			gr.add_regras(self.inicial, '&')
+			gr.add_regras(self.inicial, '&', '&')
 		return gr
 
 	def uniao(self, at):
@@ -272,7 +272,6 @@ class AutomatoFinito:
 		transicoes_nao_mortas = {}
 		novos_estados = set()
 		novos_estados = self.finais
-		alfabeto = self.alfabeto()
 		while len(novos_estados) > 0:
 			proximos = set()
 			for e in novos_estados:
@@ -290,25 +289,72 @@ class AutomatoFinito:
 	def remover_estados_equivalentes(self):
 		#TODO
 		estados = []
-		estados.append(frozenset(self.finais))
-		estados.append(frozenset(self.estados - self.finais))
-		#estados = self.separar_estados(frozenset(estados))
+		e1 = []
+		e2 = []
+		for e in (frozenset(self.estados - self.finais)):
+			e1.append((e, True, False))
+		for e in (frozenset(self.finais)):
+			e2.append((e, False, True))
+		estados.append(e1)
+		estados.append(e2)
+		print(estados)
+		estados = self.separar_estados(estados)
 		self.estados = set()
+		self.finais = set()
+		print(estados)
 		for e in estados:
+			inicial = False
+			final = False
 			for x in e:
-				self.estados.add(x)
-				break
+				if x[1]:
+					inicial = True
+				if x[2]:
+					final = True
+			self.estados.add(e[0][0])
+			if inicial:
+				self.inicial = e[0][0]
+			if final:
+				self.finais.add(e[0][0])
 		return 
 
 	def separar_estados(self, estados):
-		#TODO
 		transicoes = {}
-		#for e in estados:
-		#	for x in e:
-		#		for a in self.alfabeto()
-		##			for i in len(estados):
-		#				if 
-#
+		novos_estados = []
+		count = 0
+		for e in estados:
+			for z in e:
+				x = z[0]
+				#print('z', x)
+				n = 0
+				existe = [True] * len(novos_estados)
+				for a in self.alfabeto():
+					if (x, a) in self.transicoes.keys():
+						for i in range(len(novos_estados)):
+							if not (i, a) in transicoes.keys():
+								existe[i] = False
+								print('só q2', x, existe)
+							else:
+								if not self.transicoes[(x, a)] == transicoes[(i, a)]:
+									existe[i] = False
+					else:
+						for i in range(len(novos_estados)):
+							if (i, a) in transicoes.keys():
+								existe[i] = False
+						#if len(novos_estados) == 0:
+						#	existe[i] = False
+				existiu = False
+				for i in range(len(existe)):
+					if existe[i]:
+						novos_estados[i].append((x, x == self.inicial, x in self.finais))
+						existiu = True
+				if not existiu:
+					novos_estados.append([(x, x == self.inicial, x in self.finais)])
+					for a in self.alfabeto():
+						if (x, a) in self.transicoes.keys():
+							transicoes[(count, a)] = self.transicoes[(x, a)]
+					count = count + 1
+		if len(novos_estados) == len(estados):
+			return novos_estados
+		else:
+			return self.separar_estados(novos_estados)
 
-#if !(t in estados_extras):
-#	estados_extras.append(t)

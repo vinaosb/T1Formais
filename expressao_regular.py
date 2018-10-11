@@ -2,6 +2,7 @@
 # Alunos: Bruno George de Moraes
 #         Wagner Santos
 #
+from collections import deque 
 import automato_finito
 class ExpressaoRegular:
 	syntaxTree = {}

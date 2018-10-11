@@ -9,12 +9,14 @@ class AutomatoFinito:
 	transicoes = {}
 	inicial =  ''
 	finais = set()
+	nome = ''
 
-	def __init__(self):
+	def __init__(self, nome=''):
 		self.estados = set()
 		self.transicoes = {}
 		self.inicial = ''
 		self.finais = set()
+		self.nome = nome
 
 	def add_estado(self, estado):
 		self.estados = self.estados.union((estado,))
@@ -31,6 +33,12 @@ class AutomatoFinito:
 		else:
 			print('estado ', estado , ' nao existe')
 
+	def rem_estado_final(self, estado):
+		if (estado in self.finais):
+			self.finais.remove(estado)
+		else:
+			print('Estado final não existe')
+
 	def add_transicao(self, ei, ch, ef):
 		self.add_estado(ei)
 		self.add_estado(ef)
@@ -39,6 +47,16 @@ class AutomatoFinito:
 				self.transicoes[(ei, ch)].append(ef)
 		else:
 			self.transicoes[(ei, ch)] = [ef]
+
+	def rem_transicao(self, ei, ch, ef):
+		if ((ei, ch) in self.transicoes.keys()):
+			if len(self.transicoes[(ei, ch)]) > 1:
+				if ef in self.transicoes[(ei, ch)]:
+					self.transicoes[(ei, ch)].remove(ef)
+			else:
+				del self.transicoes[(ei, ch)]
+		else:
+			print('transicao nao existe')
 
 	def check(self, palavra) -> bool:
 		atual = self.inicial
@@ -297,11 +315,9 @@ class AutomatoFinito:
 			e2.append((e, False, True))
 		estados.append(e1)
 		estados.append(e2)
-		print(estados)
 		estados = self.separar_estados(estados)
 		self.estados = set()
 		self.finais = set()
-		print(estados)
 		for e in estados:
 			inicial = False
 			final = False
@@ -324,7 +340,6 @@ class AutomatoFinito:
 		for e in estados:
 			for z in e:
 				x = z[0]
-				#print('z', x)
 				n = 0
 				existe = [True] * len(novos_estados)
 				for a in self.alfabeto():
@@ -332,7 +347,6 @@ class AutomatoFinito:
 						for i in range(len(novos_estados)):
 							if not (i, a) in transicoes.keys():
 								existe[i] = False
-								print('só q2', x, existe)
 							else:
 								if not self.transicoes[(x, a)] == transicoes[(i, a)]:
 									existe[i] = False
@@ -358,3 +372,6 @@ class AutomatoFinito:
 		else:
 			return self.separar_estados(novos_estados)
 
+	def minimizar(self):
+		af = AutomatoFinito()
+		return af

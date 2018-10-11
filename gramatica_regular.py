@@ -9,10 +9,11 @@ class GramaticaRegular:
 	transicoes = {}
 	inicial: ''
 
-	def __init__(self):
+	def __init__(self, nome = ''):
 		self.variaveis = set()
 		self.transicoes = {}
 		self.inicial = ''
+		self.nome = nome
 
 	def add_variavel(self, variavel):
 		self.variaveis = self.variaveis.union((variavel,))
@@ -22,12 +23,15 @@ class GramaticaRegular:
 			self.inicial = variavel
 
 	def add_regras(self, v1, t, v2):
-		if (v1 in self.variaveis):
-			if (v1 not in self.transicoes.keys()):
-				self.transicoes[v1] = [(t, v2)]
-			else:
-				if((t, v2) not in self.transicoes[v1]):
-					self.transicoes[v1].append((t, v2))	
+		if v1 != '&':
+			self.add_variavel(v1)	
+		if v2 != '&':
+			self.add_variavel(v2)
+		if (v1 not in self.transicoes.keys()):
+			self.transicoes[v1] = [(t, v2)]
+		else:
+			if((t, v2) not in self.transicoes[v1]):
+				self.transicoes[v1].append((t, v2))	
 
 	def print(self):
 		saida = ''
@@ -61,7 +65,13 @@ class GramaticaRegular:
 				if e[0] == '&' and e[1] == '&':
 					af.finais.add(v)
 				elif e[0] != '&' and e[1] == '&':
-					af.transicoes[v, e[0]] = [final]
+					if (v, e[0]) in af.transicoes.keys():
+						af.transicoes[(v, e[0])].append(final)
+					else:
+						af.transicoes[(v, e[0])] = [final]
 				else:
-					af.transicoes[v, e[0]] = e[1]
+					if (v, e[0]) in  af.transicoes.keys():
+						af.transicoes[(v, e[0])].append(e[1])
+					else:
+						af.transicoes[(v, e[0])] = e[1]
 		return af

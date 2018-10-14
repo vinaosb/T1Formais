@@ -5,11 +5,16 @@ Bruno George de Moraes
 Wagner Santos
 
 Linguagem usada python.  
-Estruturas de dados usadas:    
-Modelagem AFD , GR, ER  arrays....
+Estruturas de dados usadas: arvore binaria, deque, dicionarios 	   
 
+
+Modelagem AFD , GR, ER  arrays string....
 
 
 Como usar:
+
+interface por terminal aceita comandos. 
+
+????   como? se puder botar exemplos aqui!  Pra min so da comando invalido!
 
 

@@ -12,8 +12,8 @@ except ImportError:
 import tkgen.gengui
 
 if __name__ == '__main__':
-    root = tkgen.gengui.TkJson('rsa_ui.json', title='RSA example') 
-# basicamente mudar um pouco o exemplo RSA pra ter entrada grafica ER AF GR
+    root = tkgen.gengui.TkJson('ui.json', title='ui') 
+#
 # menor prioridade que o core;
 
 

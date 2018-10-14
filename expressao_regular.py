@@ -6,15 +6,15 @@ from collections import deque
 import automato_finito
 import tree
 class ExpressaoRegular:
-        syntaxTree:tree.Tree
+        arvore:tree.Tree
+        syntax_tree = ''
         expr = '#'
         nome = ''
-        operators = set('*|')
 
         def __init__(self, expr = '#', nome = ''):
                 self.expr = expr
                 self.nome = nome
-                self.syntaxTree = tree.Tree()
+                self.syntax_tree = tree.Tree()
                 
         def concatenar(self, expressao):                
                 self.expr = self.expr[:-1] + expressao + '#'
@@ -23,47 +23,6 @@ class ExpressaoRegular:
                 saida = '' + self.expr[:-1]
                 saida += '\n'
                 return saida
-
-        def gen_tree(self):
-                ot = self.expr
-                print(ot.translate(bytes.maketrans(b"()", b"[]")))
-                
-                print( "\n")
-                st = deque(ot)
-                s = deque('')
-                for c in st:
-                        s.appendleft('[')
-                        s.append(c)
-                        s.append(']')
-                        
-                        #TODO nao tah gerando corretamenta a notacao.
-                #labelled bracket notation [X value]
-                # [S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics
-                
-                        
-                print("------------------\n")
-                print(s)      
-                                                
-                return s
-
-        # AHO 3.9.3
-        # '&' null element
-        def nullable(self, st):
-                nullable = False 
-                if st.find('&'):
-                        nullable = True
-                return nullable
-
-        #def rst_opN
-
-        #def lastpos(N) 
-        #def followpos(P)
-
-        # AHO 3.9.5
-        def to_afd(self):
-                af = automato_finito.AutomatoFinito()
-                #TODO
-                return af
 
         def create_tree(self, expr):
                 tr = tree.Tree()
@@ -125,8 +84,9 @@ class ExpressaoRegular:
                         else: #OK
                                 tr.value = '+'
                                 tr.setLeft(self.create_tree(expr[:l+1]))
+                self.arvore = tr
                 return tr               
-                                
+
 tr = ExpressaoRegular()
 expr = 'bb|aa(af)*a'
 print(expr)

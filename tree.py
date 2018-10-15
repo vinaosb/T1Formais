@@ -67,7 +67,3 @@ class Tree:
             return set(self.value)
 
     
-
-
-    
-    

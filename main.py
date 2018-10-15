@@ -19,11 +19,17 @@ listas['af'] = []
 listas['gr'] = []
 listas['er'] = []
 while t_input[0] != 'exit':
-	print(mode, t_open, n_open)
 	t_input = input().split()
 	l = len(t_input)
 	if mode == 0 and l > 0:
-		if t_input[0] == 'new'  and l > 2:
+		print('Menu inicial')
+		if t_input[0] == 'help':
+			print('new [af|gr|er] [nome]')
+			print('edit [af|gr|er] [nome]')
+			print('del [af|gr|er] [nome]')
+			print('list')
+			continue
+		elif t_input[0] == 'new'  and l > 2:
 			ling = None
 			if t_input[1] == 'af':
 				ling = automato_finito.AutomatoFinito(t_input[2])
@@ -56,7 +62,21 @@ while t_input[0] != 'exit':
 			print(out)
 			continue
 	elif mode == 1 and l > 0 :
-		if t_input[0] == 'exit':
+		print('editando o ' + t_open + ' ' + n_open)
+		if t_input[0] == 'help':
+			print('add [estado] [caractere] [estado]')
+			print('inicial [estado]')
+			print('final [add|rem] [estado]')
+			print('to_afd (caso seja um er ou af)')
+			print('to_gr (apenas para af)')
+			print('uniao [automato] (apenas para af)')
+			print('intersecao [automato] (apenas para af)')
+			print('minimizar (apenas para af)')
+			print('to_afnd (apenas para gr)')
+			print('add [expressao] (somente para er)')
+			print('print')
+			continue
+		elif t_input[0] == 'exit':
 			mode = 0
 			t_input = ' '
 			continue
@@ -147,5 +167,14 @@ while t_input[0] != 'exit':
 		elif t_open == 'er':
 			if t_input[0] == 'add' and l>1:
 				listas[t_open][n_open].add_expressao(t_input[1])
+				continue
+			elif t_input[0] == 'to_afd':
+				af = listas[t_open][n_open].to_afd()
+				af.nome = listas[t_open][n_open].nome + '_afd'
+				t_open = 'af'
+				listas[t_open].append(af)
+				n_open = len(listas[t_open])-1
+				nome_dict[(t_open, af.nome)] = n_open
+				mode = 1
 				continue
 	print('comando invalido')

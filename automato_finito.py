@@ -18,27 +18,32 @@ class AutomatoFinito:
 		self.finais = set()
 		self.nome = nome
 
+#adiciona um novo estado ao automato
 	def add_estado(self, estado):
 		self.estados = self.estados.union((estado,))
 
+#indica qual o estado inicial do automato
 	def set_estado_inicial(self, estado):
 		if (estado in self.estados):
 			self.inicial = estado
 		else:
 			print('estado ', estado , ' nao existe')
 
+#adiciona um novo estado final
 	def add_estados_finais(self, estado):
 		if (estado in self.estados):
 			self.finais = self.finais.union((estado,))
 		else:
 			print('estado ', estado , ' nao existe')
 
+# remove um estado final
 	def rem_estado_final(self, estado):
 		if (estado in self.finais):
 			self.finais.remove(estado)
 		else:
 			print('Estado final não existe')
 
+#adiciona uma transicao ao automato
 	def add_transicao(self, ei, ch, ef):
 		self.add_estado(ei)
 		self.add_estado(ef)
@@ -48,6 +53,7 @@ class AutomatoFinito:
 		else:
 			self.transicoes[(ei, ch)] = [ef]
 
+#remove uma transicao do automato
 	def rem_transicao(self, ei, ch, ef):
 		if ((ei, ch) in self.transicoes.keys()):
 			if len(self.transicoes[(ei, ch)]) > 1:
@@ -58,6 +64,8 @@ class AutomatoFinito:
 		else:
 			print('transicao nao existe')
 
+
+#verifica se o automato reconhece uma palavra, retorna true caso reconheca
 	def check(self, palavra) -> bool:
 		atual = self.inicial
 		for ch in palavra:
@@ -70,6 +78,7 @@ class AutomatoFinito:
 		else:
 			return False
 
+# retorna o conjunto de caracteres que compõe o alfabeto do automato
 	def alfabeto(self):
 		lista = set()
 		count = 0
@@ -79,6 +88,8 @@ class AutomatoFinito:
 		lista = lista - set('&')
 		return lista
 
+
+# imprime a tabela de transicoes do automato
 	def print(self):
 		saida = ''
 		nome = 'estado'
@@ -108,6 +119,10 @@ class AutomatoFinito:
 			saida = saida + '\n'
 		return saida
 
+
+# funcao que retorna um afd a partir de um automato finito
+# se o automato ja estiver determinizado não haverá mudancas
+# recebe como parametro 0 e {} inicialmente
 	def to_afd(self, count, novos):
 		repetir = False
 		afd = AutomatoFinito()
@@ -168,6 +183,7 @@ class AutomatoFinito:
 		else:
 			return afd
 
+#converte o automato em uma gramatica regular
 	def to_gr(self):
 		gr = gramatica_regular.GramaticaRegular()
 		gr.variaveis = self.estados
@@ -181,6 +197,7 @@ class AutomatoFinito:
 			gr.add_regras(self.inicial, '&', '&')
 		return gr
 
+#realiza a uniao de dois automatos e retorna o automato resultante
 	def uniao(self, at):
 		novo = AutomatoFinito()
 		a_1 = self.alfabeto()
@@ -223,6 +240,7 @@ class AutomatoFinito:
 		novo.estados.remove('&')
 		return novo
 
+#realiza a intersecao de dois automatos e retorna o automato resultante
 	def intersecao(self, at):
 		novo = AutomatoFinito()
 		a_1 = self.alfabeto()
@@ -265,6 +283,7 @@ class AutomatoFinito:
 		novo.estados.remove('&')
 		return novo
 
+#remove os estados inalcancaveis do automato
 	def remover_estados_inalcancaveis(self):
 		estados_alcancaveis = set()
 		transicoes_alcancaveis = {}
@@ -285,6 +304,7 @@ class AutomatoFinito:
 		self.estados = estados_alcancaveis
 		self.transicoes = transicoes_alcancaveis
 
+#remove os estados mortos do automato
 	def remover_estados_mortos(self):
 		estados_nao_mortos = set()
 		transicoes_nao_mortas = {}
@@ -305,7 +325,7 @@ class AutomatoFinito:
 
 
 	def remover_estados_equivalentes(self):
-		#TODO
+		af = AutomatoFinito()
 		estados = []
 		e1 = []
 		e2 = []
@@ -315,9 +335,9 @@ class AutomatoFinito:
 			e2.append((e, False, True))
 		estados.append(e1)
 		estados.append(e2)
+		print(estados)
 		estados = self.separar_estados(estados)
-		self.estados = set()
-		self.finais = set()
+		print(estados)
 		for e in estados:
 			inicial = False
 			final = False
@@ -326,12 +346,13 @@ class AutomatoFinito:
 					inicial = True
 				if x[2]:
 					final = True
-			self.estados.add(e[0][0])
+			print(e)
+			#for keys in self.transicoes.keys()
 			if inicial:
-				self.inicial = e[0][0]
+				af.inicial = e[0][0]
 			if final:
-				self.finais.add(e[0][0])
-		return 
+				af.finais.add(e[0][0])
+		return af
 
 	def separar_estados(self, estados):
 		transicoes = {}
@@ -340,7 +361,6 @@ class AutomatoFinito:
 		for e in estados:
 			for z in e:
 				x = z[0]
-				n = 0
 				existe = [True] * len(novos_estados)
 				for a in self.alfabeto():
 					if (x, a) in self.transicoes.keys():
@@ -373,5 +393,10 @@ class AutomatoFinito:
 			return self.separar_estados(novos_estados)
 
 	def minimizar(self):
-		af = AutomatoFinito()
-		return af
+		at = AutomatoFinito()
+		at = self
+		at.remover_estados_mortos()
+		at.remover_estados_inalcancaveis()
+		at.remover_estados_equivalentes()
+		return at
+		

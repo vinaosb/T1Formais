@@ -36,15 +36,17 @@ class GramaticaRegular:
 	def print(self):
 		saida = ''
 		for v in self.variaveis:
-			if v == self.inicial:
-				saida = saida + '->'
-			saida = saida + '(' + v + ') -> '
-			for prod in self.transicoes[v]:
-				if prod[1] != '&':
-					saida = saida + prod[0] + '(' +prod[1] + ') | '
-				else:
-					saida = saida + prod[0] + ' | '
-			saida = saida[:-2] + '\n'
+			if v in self.transicoes.keys():
+				if v == self.inicial:
+					saida = saida + '->'
+				saida = saida + '(' + v + ') -> '
+			
+				for prod in self.transicoes[v]:
+					if prod[1] != '&':
+						saida = saida + prod[0] + '(' +prod[1] + ') | '
+					else:
+						saida = saida + prod[0] + ' | '
+				saida = saida[:-2] + '\n'
 		return saida
 
 	def alfabeto(self):
@@ -73,5 +75,5 @@ class GramaticaRegular:
 					if (v, e[0]) in  af.transicoes.keys():
 						af.transicoes[(v, e[0])].append(e[1])
 					else:
-						af.transicoes[(v, e[0])] = e[1]
+						af.transicoes[(v, e[0])] = [e[1]]
 		return af

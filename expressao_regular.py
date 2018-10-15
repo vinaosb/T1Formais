@@ -7,6 +7,7 @@ import automato_finito
 import tree
 class ExpressaoRegular:
 		arvore:tree.Tree
+		positions = set()
 		expr = '#'
 		nome = ''
 
@@ -87,26 +88,28 @@ class ExpressaoRegular:
 				return tr               
 		
 		def followpos(self, tr:tree.Tree):
-			   fp = tr.firstpos()
-			   lp = tr.lastpos()
-			   i=0
-			   temp = set()
-			   #for p in tr: #TODO  not iterable 
-			   #	i += 1
-			   #	temp.append(p.value, i)
-			   return temp
-
-
+			temp = set()
+			# livro eh confuso parte 3.9.4 item 2 
+			if tr.value == '*' and tr.lastpos() != None:
+				return tr.fistpos()
+			#3.9.4 item 1 	
+			elif tr.value == '+':
+				#for i in tr.childs[1].lastpos
+						#temp.append(i.fistpos)
+						return temp
+						
 		def to_afd(self):
 			   af = automato_finito.AutomatoFinito()
 			   af.inicial = self.arvore.value
 			   final = '#'
 			   alfabeto = self.expr.lstrip('+|*?()')
+			   positions = ()
+
 			   Dstates = set()
 			   #while there is a non-marked state S in Dstates  
 			   # mark S
-			   for i in alfabeto:
-			   	U = union(followpos()) #followpos p for all p in S from alfabeto i
+			   #for i in alfabeto:
+			   	#U = union(S.followpos()) #followpos p for all p in S from alfabeto i
 
 
 

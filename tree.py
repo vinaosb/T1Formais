@@ -1,10 +1,12 @@
 class Tree:
     childs = []
     value = ''
+    
 
     def __init__(self):
         self.childs = [None, None]
         self.value = ''
+
 
     def setLeft(self, left):
         self.childs[0] = left

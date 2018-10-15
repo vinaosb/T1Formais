@@ -4,92 +4,128 @@
 #
 from collections import deque 
 import automato_finito
+import tree
 class ExpressaoRegular:
-	syntaxTree = ''
-	expr = ''
-	nome = ''
+		arvore:tree.Tree
+		expr = '#'
+		nome = ''
 
-	def __init__(self, expr = '', nome = ''):
-		self.expr = expr
-		self.nome = nome
-		
-	def add_expressao(self, expressao):                
-		self.expr.append(expressao)
-
-	def print(self):
-		saida = '' + self.expr
-		saida += '\n'
-		return saida
-
-	def gen_tree(self):
-				ot = self.expr	
-				ot = ot.translate(bytes.maketrans(b"()", b"[]")) 
-				print(ot) 
+		def __init__(self, expr = '#', nome = ''):
+				self.expr = expr
+				self.nome = nome
+				self.syntax_tree = tree.Tree()
 				
-				print( "\n")
-				st = deque(ot)
-				s = deque('')
-				for c in st:
-						print(c)
-						if c == '|':
-							s.append('*')
-						s.appendleft('[')
-						s.append(c)
-						s.append(']')
-						
-				#TODO arrumar notacao 
-				#labelled bracket notation [X value]
+		def concatenar(self, expressao):                
+				self.expr = self.expr[:-1] + expressao + '#'
 
-				for i in s: i.rsplit('[')
-				print("------------------\n")
-				print(s)
-				print("#-----------------#\n")
-				x ='[S[NP[N Alice]][VP[V is][NP[N+[N* a student][PP? of physics'
-				y = x.rsplit('[')
-				print(y)
+		def print(self):
+				saida = '' + self.expr[:-1]
+				saida += '\n'
+				return saida
 
-				syntaxTree = s
-				return s
-
-		#'&' or '?' or '*' nullable 
-		#AHO 3.9.3
-	def nullable(st):
-				nullable = false
-				if st.find('&') or st.find('?') or st.find('*'):
-						nullable = true
-				return nullable
+		def create_tree(self, expr):
+				tr = tree.Tree()
+				l = len(expr)-1
+				if l == 0:
+						tr.value = expr[0]
+						return tr
+				elif l < 0:
+						return tr  
+				else:
+						count = 0
+						if expr[l] ==  ')':
+								i = 1
+								while i != 0:
+										count = count + 1
+										if count > len(expr):
+												return -1
+										if expr[l-count] == ')':
+												i = i + 1
+										elif expr[l-count] == '(':
+												i = i - 1
+								tr.setRight(self.create_tree(expr[l-count+1:l]))
+						elif expr[l] == '*':
+								count = 0
+								if expr[l-1] ==  ')':
+										i = 1
+										while i != 0:
+												count = count + 1
+												if count > l:
+														return -1
+												if expr[l-count-1] == ')':
+														i = i + 1
+												elif expr[l-count-1] == '(':
+														i = i - 1
+										if l-count-2<0:
+												print('terminando o *', expr[l-count:-2])
+												tr.value = '*'
+												tr.setLeft(self.create_tree(expr[l-count:-2]))
+												return tr
+										else:
+												print('passando pelo *', expr[l-count-1:])
+												tr.setRight(self.create_tree(expr[l-count-1:]))
+												count = count + 1
+								else:
+										if l-2 < 0:
+												tr.value = '*'
+												tr.setLeft(self.create_tree(expr[:-1]))
+												return tr
+										else:
+												tr.setRight(self.create_tree(expr[l-1:]))
+						else:
+								tr.setRight(self.create_tree(expr[l]))
+								
+						l = l - 1 - count
+						print('fim', expr[:l+1])
+						if expr[l] == '|':
+								tr.value = expr[l]
+								tr.setLeft(self.create_tree(expr[:l]))
+						else: #OK
+								tr.value = '+'
+								tr.setLeft(self.create_tree(expr[:l+1]))
+				self.arvore = tr
+				return tr               
 		
-	def rst_opN(c1, c2):
-				rst = set()
-				for i in range(1, 10): 
-						rst.append(i, syntaxTree[c1] )
-				
-				return rst
-	def lastpos(c1 , c2):
-				return rst_opN(c2 , c1)
+		def followpos(self, tr:tree.Tree):
+			   fp = tr.firstpos()
+			   lp = tr.lastpos()
+			   i=0
+			   temp = set()
+			   #for p in tr: #TODO  not iterable 
+			   #	i += 1
+			   #	temp.append(p.value, i)
+			   return temp
 
-	def followpos( ):
-		#TODO
 
-				return st
-		
-	# AHO 3.9.5
-	def to_afd(self):
-		af = automato_finito.AutomatoFinito()
-		final = '_F_'
-		af.estados = rst_opN(syntaxTree)  
-		af.inicial = set()
-		af.finais.add(final)
-		#TODO
-		e = 10
-		#there is a non-marked stateS inDstates
-		#while ()
-		for e in syntaxTree:
-		 	if not nullable(s):
-		 		if s[0] == s[1]:
-		 				e = 1
+		def to_afd(self):
+			   af = automato_finito.AutomatoFinito()
+			   af.inicial = self.arvore.value
+			   final = '#'
+			   alfabeto = self.expr.lstrip('+|*?()')
+			   Dstates = set()
+			   #while there is a non-marked state S in Dstates  
+			   # mark S
+			   for i in alfabeto:
+			   	U = union(followpos()) #followpos p for all p in S from alfabeto i
 
 
 
-		
-		return af
+
+
+
+
+ex = 'bb|aa(af)*a'
+tr = ExpressaoRegular(ex)
+print(tr.print())
+print(tr.create_tree(tr.expr).to_string())
+print(tr.create_tree(tr.expr).firstpos())
+print('---------------')
+
+
+print('outra ER')
+x ='c?d(a|b)+'
+e = ExpressaoRegular(x)
+print(e.create_tree(e.expr).lastpos()) 
+print(e.followpos(e.arvore)) 
+print(e.to_afd())
+

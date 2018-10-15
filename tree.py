@@ -51,4 +51,23 @@ class Tree:
         else:
             return set(self.value)
 
+    def lastpos(self):
+        if self.childs[1] is None or self.childs[0] is None:
+            return ''
+        if self.value == '*':
+            return self.childs[1].lastpos()
+        elif self.value == '+':
+            if self.childs[1].is_nullable():
+                return self.childs[1].lastpos().union(self.childs[0].lastpos())
+            else:
+                return self.childs[1].lastpos()
+        elif self.value == '|':
+            return self.childs[1].lastpos().union(self.childs[0].lastpos())
+        else:
+            return set(self.value)
+
+    
+
+
+    
     

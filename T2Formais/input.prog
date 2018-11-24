@@ -1,14 +1,17 @@
-int x1 = 0
-if z >= y {
-	123.3
+{
+	int x1 ;
+	bool vivo ;
+	vivo = true ;
+	x1 = 2 ;
+	if ( ( z >= 1 ) && ( ! vivo ) ) then
+	{
+		a = 123.3 ;
+	}
+	else
+	{
+		x1 = 0 ;
+		vivo = false ;
+	}
+
+	x1 = x1 / 2 ;
 }
-321.
-3a
-|
-^^^^
-
-^*+/*+
-
-&
-
-asdf=asdf

@@ -1,44 +1,61 @@
+import sys
 class Lexical:
 
 	letter = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	digit = set("0123456789")
 	special = set("<>=*/;()[]}{&|!-+")
 	tokens = [] # id - tipo
-	tabela_simbolos = [ ('if', 'pr', 'if'),
-						('then', 'pr', 'then'),
-						('else', 'pr', 'else'),
-						('while', 'pr', 'while'),
-						('do', 'pr', 'do'),
-						('break', 'pr', 'break'),
-						('true', 'pr', 'true'),
-						('false', 'pr', 'false'),
+	tabela_simbolos = [ ('if', 'if', 'if'),
+						('then', 'then', 'then'),
+						('else', 'else', 'else'),
+						('while', 'while', 'while'),
+						('do', 'do', 'do'),
+						('break', 'break', 'break'),
+						('true', 'true', 'true'),
+						('false', 'false', 'false'),
 						('int', 'basic', 'int'),
-						('real', 'basic', 'real'),
-						('bool', 'basic', 'bool')] # <lexema> [<id> <if> <else> <lop> <mop> <begin> <end> ]
-	token_type = [  'lop', 'lop', 'attr', 'lop', 'delim', 'delim', 'delim', 'delim', 'delim', 'delim'
-					, 'mop', 'mop', ':P', ':P', 'mop', 'mop', 'num', 'id', ':P', 'lop', 'lop', 'mop', 'lop', 'lop'
-					, 'lop', 'lop', 'real']
+						('float', 'basic', 'float'),
+						('bool', 'basic', 'bool')] # <lexema> <terminal> <tipo>
+	token_type = [  'lop', 'lop', 'attr', 'lop', 'delim', 'delim', 'delim', 'delim', 'delim', 'delim',
+					'mop', 'mop', ':P'  , ':P' , 'mop'  , 'mop'  , 'num'  , 'id'   , ':P'   , 'lop'  ,
+					'lop', ':P', 'lop' , 'lop', 'lop', 'lop', 'real', 'endl']
 	invalid = set((-1, 0, 13, 14, 19))
 
 	def run(self):
-		input_name = "input"
+		if len(sys.argv) > 1:
+			input_name = sys.argv[1]
+		else:
+			input_name = "input"
 		input_file = open(input_name + '.prog', 'r')
+		errors = []
+		line_n = 0
 		for line in input_file:
+			line_n = line_n + 1
 			line = line.replace('\t','')
 			line = line.replace('\n','')
+			word_n = 0
 			for word in line.split(' '):
+				word_n = word_n + 1
 				result = self.find_token(word)
-				if (result[1] == 0):
+				if (result[1] == 0): #ignora linha vazia
 					continue
-				if result[0]:
-					token = (word, self.token_type[result[1]-1], result[2])
+				if result[0]: #não é um estado invalido
+					token = (result[4], result[2], self.token_type[result[1]-1]) #(<lexema>, <terminal>, <tipo>)
 					self.tokens.append(self.atualiza_tabela(token))
-				else:
-					continue
-					#aqui deu erro
-					#print(word, result)
+				if result[3] != '': #se existir erro
+					errors.append('Error found on line '+ str(line_n) + ', word ' + str(word_n) + ': \'' + word + '\'' +  '\n'
+						+ result[3] + '\n')
+		out = ''
 		for t in self.tokens:
-			print(self.tabela_simbolos[t])
+			out = out + self.tabela_simbolos[t][1] + ' '
+			if self.tabela_simbolos[t][1] == 'endl':
+				out = out + '\n'
+			#print (self.tabela_simbolos[t])
+		print(out)
+
+		for error in errors:
+				print(error)
+		return(self.tokens, self.tabela_simbolos)
 
 	def atualiza_tabela(self, token):
 		l = len(self.tabela_simbolos)
@@ -53,222 +70,199 @@ class Lexical:
 		state = 0
 		error = ''
 		tipo = '' 
+		acc = ''
+		best_state = 0
 		for char in word:
 			if (state == 0):
 				if (char == '>'):
-					tipo = 'GT'
+					tipo = 'gt'
 					state = 1
 				elif (char == '<'):
-					tipo = 'LT'
+					tipo = 'lt'
 					state = 2
 				elif (char == '='):
-					tipo = 'ATTR'
+					tipo = 'attr'
 					state = 3
 				elif (char == '!'):
-					tipo = 'NOT'
+					tipo = 'not'
 					state = 4
 				elif (char == '('): #final
-					tipo = 'LP'
+					tipo = 'lp'
 					state = 5
 				elif (char == ')'): #final
-					tipo = 'RP'
+					tipo = 'rp'
 					state = 6
 				elif (char == '['): #final
-					tipo = 'LB'
+					tipo = 'lb'
 					state = 7
 				elif (char == ']'): #final
-					tipo = 'RB'
+					tipo = 'rb'
 					state = 8
 				elif (char == '{'): #final
-					tipo = 'LC'
+					tipo = 'lc'
 					state = 9
 				elif (char == '}'): #final
-					tipo = 'RC'
+					tipo = 'rc'
 					state = 10
 				elif (char == '/'): #final
-					tipo = 'DIV'
+					tipo = 'div'
 					state = 11
 				elif (char == '*'):
-					tipo = 'MULT'
+					tipo = 'mult'
 					state = 12
 				elif (char == '|'):
 					state = 13
-					tipo = 'OR'
-					error = 'expected \"|\"'
+					tipo = 'or'
+					error = 'Expected \"|\"'
 				elif (char == '&'):
 					state = 14
-					tipo = 'AND'
-					error = 'expected \"&\"'
+					tipo = 'and'
+					error = 'Expected \"&\"'
 				elif (char == '-'):  #final
-					tipo = 'MIN'
+					tipo = 'minus'
 					state = 15
 				elif (char == '+'):  #final
-					tipo = 'PLUS'
+					tipo = 'plus'
 					state = 16
 				elif (char in self.digit):
 					state = 17
+					tipo = 'num'
 				elif (char in self.letter):
 					state = 18
+					tipo = 'id'
+				elif (char == ';'):
+					state = 28
+					tipo = 'endl'
 				else:
 					state = -1
-					error = ' expected something'
-
-				continue
+					error = 'Expected something'
 			elif(state == 1): # >
 				if (char == '='):
 					state = 26
-					tipo = 'GET'
+					tipo = 'get'
 				else:
 					state = -1
 				error = ''
-				continue
 			elif(state == 2): # <
 				if (char == '='):
 					state = 25
-					tipo = 'LET'
+					tipo = 'let'
 				else:
 					state = -1
 				error = ''
-				continue
 			elif(state == 3): # = 
 				if (char == '='):
 					state = 24
-					tipo = 'EQ'
+					tipo = 'eq'
 				else:
 					state = -1
 				error = ''
-				continue
 			elif(state == 4): # !
 				if (char == '='):
 					state = 23
-					tipo = 'DF'
+					tipo = 'dif'
 				else:
 					state = -1
 				error = ''
-				continue
 			elif(state == 5): # (
 				state = -1
 				error = ''
-				continue
 			elif(state == 6): # )
 				state = -1
 				error = ''
-				continue
 			elif(state == 7): # [
 				state = -1
 				error = ''
-				continue
 			elif(state == 8): # ]
 				state = -1
 				error = ''
-				continue
 			elif(state == 9): # {
 				state = -1
 				error = ''
-				continue
 			elif(state == 10): # }
 				state = -1
 				error = ''
-				continue
 			elif(state == 11): # /
 				state = -1
 				error = ''
-				continue
 			elif(state == 12): # *
-				if (char == '*'):
-					state = 22
-					tipo = 'GT'
-				else:
-					state = -1
-				continue
+				state = -1
+				error = ''
 			elif(state == 13): # |
 				if (char == '|'):
 					state = 21
 					error = ''
 				else:
 					state = -1
-				
-				continue
 			elif(state == 14): # &
 				if (char == '&'):
 					state = 20
 					error = ''
 				else:
 					state = -1
-				
-				continue
 			elif(state == 15): # -
 				state = -1
 				error = ''
-				continue
 			elif(state == 16): # + 
 				state = -1
 				error = ''
-				continue
 			elif(state == 17): # num
 				if (char in self.digit):
 					state = 17
 					error = ''
 				elif (char == '.'):
 					state = 19
-					error = 'expected more digits"'
+					error = 'Expected more digits'
 				else:
 					state = -1
-				continue
 			elif(state == 18): #id
 				if ((char in self.letter) or (char in self.digit)):
 					state = 18
 				else:
 					state = -1
 				error = ''
-				continue
 			elif(state == 19): # num.
 				if (char in self.digit):
 					state = 27
 					error = ''
+					tipo = 'real'
 				else:
 					state =-1
-				
-				continue
 			elif(state == 20): # &&
 				state = -1
 				error = ''
-				continue
 			elif(state == 21): # ||
 				state = -1
 				error = ''
-				continue
-			elif(state == 22): # **
+			elif(state == 22): # ????????????????
 				state = -1
 				error = ''
-				continue
 			elif(state == 23): # !=
 				state = -1
 				error = ''
-				continue
 			elif(state == 24): # ==
 				state = -1
 				error = ''
-				continue
 			elif(state == 25): # <=
 				state = -1
 				error = ''
-				continue
 			elif(state == 26): # >=
 				state = -1
 				error = ''
-				continue
 			elif(state == 27): # num.num
 				error = ''
 				if (char in self.digit):
 					state = 27
 				else:
 					state = -1
-				continue
+			elif(state == 28): # ;
+				state = -1
+				error = ''
+			if(state == -1):
+				break;
+			best_state = state
+			acc = acc + char
 		if (state == -1):
-			error = 'found invalid \"'+ char + '\"'
-		return ((not (state in self.invalid)), state, tipo, error)
-
-lex = Lexical()
-lex.run()
+			error = 'Found invalid \"'+ char + '\"'
+		return ((not (best_state in self.invalid)), best_state, tipo, error, acc)
 # 

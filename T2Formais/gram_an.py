@@ -6,8 +6,10 @@ class Analisador:
 	first = {}
 	ta = {}
 	pilha = []
+	acc = []
 
 	def __init__(self):
+
 		self.follow['program'] = set()
 		self.follow['program'].add('$')
 		self.ler_gramatica()
@@ -18,36 +20,54 @@ class Analisador:
 		self.calc_follow()
 		self.calc_follow()
 		self.calc_follow()
+		self.sync_set()
 		w = len(self.gram.keys()) #numero de terminais
 		h = len(self.calc_num_terminais()) #numero de nao terminais
 		self.tab_ll1()
 		self.pilha = ['program', '$']
 
 	def ler_token(self,token):
+		error = ''
 		print(self.pilha)
 		if self.pilha[0] in self.gram.keys():
 			if (self.pilha[0], token) in self.ta.keys():
 				p = self.pilha[0]
-				self.pilha.pop(0)
-				l = self.ta[(p,token)].copy()
-				l.reverse()
-				for t in l:
-					if not t == '&':
-						self.pilha.insert(0, t)
-				self.ler_token(token)
+				if self.ta[(p, token)][0] == 'sync': #encontrou sync tira da pilha
+					self.pilha.pop(0)
+					error = error + 'Expected ' + str(self.calc_first(self.pilha[0])) + ', found: ' + token + '. Action: Popping terminal. \n'
+					error = error + self.ler_token(token)
+				else:
+					self.pilha.pop(0)
+					l = self.ta[(p,token)].copy()
+					l.reverse()
+					for t in l:
+						if not t == '&':
+							self.pilha.insert(0, t)
+					error = error + self.ler_token(token)
 			else:
-				print('erro', self.pilha[0], token)
-				return 0
-		elif (self.pilha[0] == token):
+				#skip
+				if token == '$': #fim de arquivo
+					error = error + 'Unexpected end of file \n'
+				else: #nao encontrou sync, pula o token
+					error = error + 'Expected ' + str(self.calc_first(self.pilha[0])) + ', found: ' + token + '. Action: Skipping token. \n'
+				return error
+		elif (self.pilha[0] == token): # encontrou terminal correto
+			self.acc.append(self.pilha[0])
 			self.pilha.pop(0)
-		else:
-			if (self.pilha[0] == '$'):
-				print('foi ')
-			else:
-				print('segundo erro')
-			return 0
-		return 1
+		else: #encontrou terminal errado
+			if (self.pilha[0] == '$'): #encontrou tokens depois do ultimo '}'
+				error = error + 'Unexpected token after end of program: ' + token + '. \n'
+			else: # igonra o input e aceita o terminal da pilha
+				error = error + 'Expected ' + self.pilha[0] + ', found: ' + token + '. Action: Using ' + self.pilha[0] + '.\n'
+				self.acc.append(self.pilha[0])
+				self.pilha.pop(0)
+			return error
+		return error
 
+	def sync_set(self):
+		for nt in self.follow.keys():
+			for t in self.follow[nt]:
+				self.ta[nt,t] = ['sync']
 
 
 	def ler_gramatica(self):
@@ -174,18 +194,43 @@ class Analisador:
 		return nt
 
 
-
+if len(sys.argv) > 1:
+	input_name = sys.argv[1]
+else:
+	input_name = "input"
 an = Analisador()
 lex = reader.Lexical()
-res = lex.run()
-tokens = res[0]
-tabela = res[1]
-print(an.ta[('decls', 'basic')])
-for t in tokens:
-	print(tabela[t][1])
-	if an.ler_token(tabela[t][1]) == 0:
-		break
-		i = 0
+res = lex.run(input_name)
+erros = res[1]
+tabela = res[0]
+t = lex.next_token()
+while t != True:
+	print(tabela[t[0]][1])
+	erro = an.ler_token(tabela[t[0]][1])
+	if erro != '':
+		erros = erros + 'Error found on line: ' + str(t[1]) + ' word: ' + str(t[2]) + '\n ' +  erro + '\n'
+	t = lex.next_token()
+
+print('')
+
+if erros != '':
+	print('ERROS: ')
+	print()
+	print(erros)
+	
+else:
+	print('COMPILADO COM SUCESSO')
+
+acc = ''
+for token in an.acc:
+	acc = acc + token + ' '
+	if token == 'endl':
+		acc = acc + '\n'
+print('')
+print('TEXTO ACEITO:')
+print('')
+print(acc)
+
 #for key in an.ta.keys():
 #	if an.ta[key][0] == '&':
 #		print(key,an.ta[key])

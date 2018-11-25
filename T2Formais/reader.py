@@ -15,17 +15,15 @@ class Lexical:
 						('false', 'false', 'false'),
 						('int', 'basic', 'int'),
 						('float', 'basic', 'float'),
+						('$', '$', '$'),
 						('bool', 'basic', 'bool')] # <lexema> <terminal> <tipo>
 	token_type = [  'lop', 'lop', 'attr', 'lop', 'delim', 'delim', 'delim', 'delim', 'delim', 'delim',
 					'mop', 'mop', ':P'  , ':P' , 'mop'  , 'mop'  , 'num'  , 'id'   , ':P'   , 'lop'  ,
 					'lop', ':P', 'lop' , 'lop', 'lop', 'lop', 'real', 'endl']
 	invalid = set((-1, 0, 13, 14, 19))
+	pointer = 0
 
-	def run(self):
-		if len(sys.argv) > 1:
-			input_name = sys.argv[1]
-		else:
-			input_name = "input"
+	def run(self, input_name):
 		input_file = open(input_name + '.prog', 'r')
 		errors = []
 		line_n = 0
@@ -41,21 +39,16 @@ class Lexical:
 					continue
 				if result[0]: #não é um estado invalido
 					token = (result[4], result[2], self.token_type[result[1]-1]) #(<lexema>, <terminal>, <tipo>)
-					self.tokens.append(self.atualiza_tabela(token))
+					self.tokens.append((self.atualiza_tabela(token),line_n, word_n))
 				if result[3] != '': #se existir erro
 					errors.append('Error found on line '+ str(line_n) + ', word ' + str(word_n) + ': \'' + word + '\'' +  '\n'
 						+ result[3] + '\n')
 		out = ''
-		for t in self.tokens:
-			out = out + self.tabela_simbolos[t][1] + ' '
-			if self.tabela_simbolos[t][1] == 'endl':
-				out = out + '\n'
-			#print (self.tabela_simbolos[t])
-		print(out)
-
-		for error in errors:
-				print(error)
-		return(self.tokens, self.tabela_simbolos)
+		self.tokens.append((10, line_n, 0))
+		for erro in errors:
+			out = out + erro + '\n'
+		#print(out)
+		return( self.tabela_simbolos, out)
 
 	def atualiza_tabela(self, token):
 		l = len(self.tabela_simbolos)
@@ -64,6 +57,15 @@ class Lexical:
 				return i
 		self.tabela_simbolos.append(token)
 		return l
+
+	def next_token(self):
+		if self.pointer < len(self.tokens):
+			token = self.tokens[self.pointer]
+			self.pointer = self.pointer + 1
+			return token
+		else:
+			return True
+
 
 
 	def find_token(self, word):
